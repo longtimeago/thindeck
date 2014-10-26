@@ -29,58 +29,58 @@
  */
 package com.thindeck.dynamo;
 
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.jcabi.dynamo.Frame;
-import com.jcabi.dynamo.Item;
+import com.jcabi.aspects.Immutable;
 import com.jcabi.dynamo.Region;
-import com.jcabi.dynamo.Table;
-import java.io.IOException;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.Test;
-import org.mockito.Mockito;
+import com.thindeck.api.Task;
+import com.thindeck.api.Tasks;
+import java.util.Map;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
- * Tests for {@link DyRepo}.
+ * Dynamo implementation of {@link Tasks}.
  *
- * @author Krzysztof Krason (Krzysztof.Krason@gmail.com)
+ * @author Paul Polishchuk (ppol@yua.fm)
  * @version $Id$
+ * @since 0.5
+ * @todo #373 Implement get and open methods.
+ * @todo #373 Implement all and add methods.
  */
-public final class DyRepoTest {
+@Immutable
+@ToString
+@EqualsAndHashCode
+@SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField" })
+public final class DyTasks implements Tasks {
     /**
-     * DyRepo can create repo with provided name.
+     * Region we're in.
      */
-    @Test
-    public void createsRepoWithName() {
-        final String name = "some name";
-        final Item item = Mockito.mock(Item.class);
-        final AttributeValue value = Mockito.mock(AttributeValue.class);
-        Mockito.when(value.getS()).thenReturn(name);
-        try {
-            Mockito.when(item.get(DyRepo.ATTR_NAME)).thenReturn(value);
-        } catch (final IOException ex) {
-            throw new IllegalStateException(ex);
-        }
-        MatcherAssert.assertThat(
-            new DyRepo(item).name(),
-            Matchers.equalTo(name)
-        );
+    private final transient Region region;
+
+    /**
+     * Constructor.
+     * @param rgn Region
+     */
+    public DyTasks(final Region rgn) {
+        this.region = rgn;
     }
-    /**
-     * DyRepo can get {@code Tasks}.
-     */
-    @Test
-    public void getTasks() {
-        final Item item = Mockito.mock(Item.class);
-        final Frame frame = Mockito.mock(Frame.class);
-        final Table table = Mockito.mock(Table.class);
-        final Region region = Mockito.mock(Region.class);
-        Mockito.when(item.frame()).thenReturn(frame);
-        Mockito.when(frame.table()).thenReturn(table);
-        Mockito.when(table.region()).thenReturn(region);
-        MatcherAssert.assertThat(
-            new DyRepo(item).tasks(),
-            Matchers.notNullValue()
-        );
+
+    @Override
+    public Task get(final long number) {
+        throw new UnsupportedOperationException("#get");
+    }
+
+    @Override
+    public Iterable<Task> open() {
+        throw new UnsupportedOperationException("#open");
+    }
+
+    @Override
+    public Iterable<Task> all() {
+        throw new UnsupportedOperationException("#all");
+    }
+
+    @Override
+    public Task add(final String command, final Map<String, String> args) {
+        throw new UnsupportedOperationException("#add");
     }
 }

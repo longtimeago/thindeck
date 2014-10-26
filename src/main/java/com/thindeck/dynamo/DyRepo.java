@@ -34,13 +34,14 @@ import com.thindeck.api.Memo;
 import com.thindeck.api.Repo;
 import com.thindeck.api.Tasks;
 import java.io.IOException;
+import javax.validation.constraints.NotNull;
 
 /**
  * Dynamo implementation of {@link Repo}.
  *
  * @author Krzysztof Krason (Krzysztof.Krason@gmail.com)
  * @version $Id$
- * @todo #322 Implement tasks and memo methods.
+ * @todo #373 Implement memo method.
  */
 public final class DyRepo implements Repo {
     /**
@@ -67,22 +68,27 @@ public final class DyRepo implements Repo {
      * Ctor.
      * @param itm Item
      */
-    public DyRepo(final Item itm) {
+    public DyRepo(@NotNull final Item itm) {
         this.item = itm;
     }
 
     @Override
     public String name() {
-        return this.item.get(DyRepo.ATTR_NAME).getS();
+        try {
+            return this.item.get(DyRepo.ATTR_NAME).getS();
+        } catch (final IOException ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 
     @Override
+    @NotNull
     public Tasks tasks() {
-        throw new UnsupportedOperationException();
+        return new DyTasks(this.item.frame().table().region());
     }
 
     @Override
     public Memo memo() throws IOException {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("#memo");
     }
 }

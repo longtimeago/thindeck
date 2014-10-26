@@ -34,13 +34,23 @@ import com.jcabi.urn.URN;
 import com.thindeck.api.Repos;
 import com.thindeck.api.Usage;
 import com.thindeck.api.User;
+import java.io.IOException;
 
 /**
  * Dynamo implementation of the {@link User}.
  *
  * @author Krzysztof Krason (Krzysztof.Krason@gmail.com)
  * @version $Id$
- * @todo #322 Implement repos and usage methods.
+ * @todo #374 At the moment, the repos() method returns all Repos associated
+ *  with the Dynamo region, and this is definitely incorrect. I think we need to
+ *  refactor DyRepos in order to include a user criteria (probably URN) in its
+ *  constructor, and have DyUser pass it so that it will only return the
+ *  associated criteria. I'm not completely sure about this design, feel free to
+ *  implement something else if you think it's wrong. The intuition behind it is
+ *  that we should only get the repos associated with the current user.
+ * @todo #374 Implement usage method. To do this we need to implement a class
+ *  DyUsage that implements the Usage interface. This will obtain the usage
+ *  associated to this user from Dynamo DB.
  */
 public final class DyUser implements User {
     /**
@@ -68,12 +78,16 @@ public final class DyUser implements User {
 
     @Override
     public URN urn() {
-        return URN.create(this.item.get(DyUser.ATTR_URN).getS());
+        try {
+            return URN.create(this.item.get(DyUser.ATTR_URN).getS());
+        } catch (final IOException ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 
     @Override
     public Repos repos() {
-        throw new UnsupportedOperationException();
+        return new DyRepos(this.item.frame().table().region());
     }
 
     @Override
